@@ -14,6 +14,10 @@ namespace SellbriteAccess.Models
 		public string SbOrderSeq { get; set; }
 		[ JsonProperty( "ordered_at" ) ]
 		public string OrderedAt { get; set; }
+		[ JsonProperty( "paid_at" ) ]
+		public string PaidAt { get; set; }
+		[ JsonProperty( "shipped_at" ) ]
+		public string ShippedAt { get; set; }
 		[ JsonProperty( "customer_notes" ) ]
 		public string CustomerNotes { get; set; }
 		public OrderItem[] Items { get; set; }
@@ -64,9 +68,12 @@ namespace SellbriteAccess.Models
 
 	public class SellbriteOrder
 	{
+		public string Id { get; set; }
 		public string ExternalId { get; set; }
 		public string ChannelName { get; set; }
 		public DateTime CreatedAtUtc { get; set; }
+		public DateTime? PaidAtUtc { get; set; }
+		public DateTime? ShippedAtUtc { get; set; }
 		public string Notes { get; set; }
 		public SellbriteOrderItem[] Items { get; set; }
 		public SellbriteShippingInfo ShippingInfo { get; set; }
@@ -111,6 +118,7 @@ namespace SellbriteAccess.Models
 		{
 			var sellbriteOrder = new SellbriteOrder()
 			{
+				Id = order.SbOrderSeq,
 				ExternalId = order.DisplayRef,
 				ChannelName = order.ChannelTypeDisplayName,
 				CreatedAtUtc = order.OrderedAt.FromRFC3339ToUtc(),
@@ -170,11 +178,21 @@ namespace SellbriteAccess.Models
 				sellbriteOrder.ShipmentStatus = shipmentStatus;
 			}
 
+			if ( order.PaidAt != null )
+			{
+				sellbriteOrder.PaidAtUtc = order.PaidAt.FromRFC3339ToUtc();
+			}
+
+			if ( order.ShippedAt != null )
+			{
+				sellbriteOrder.ShippedAtUtc = order.ShippedAt.FromRFC3339ToUtc();
+			}
+
 			return sellbriteOrder;
 		}
 	}
 
 	public enum SellbriteOrderStatus { Open, Completed, Cancelled }
-	public enum SellbriteOrderPaymentStatus { All, None, Partial }
-	public enum SellbriteOrderShipmentStatus { All, None, Partial }
+	public enum SellbriteOrderPaymentStatus { None, Partial, All }
+	public enum SellbriteOrderShipmentStatus { None, Partial, All }
 }

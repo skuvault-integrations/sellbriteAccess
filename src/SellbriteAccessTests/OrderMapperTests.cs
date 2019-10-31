@@ -12,6 +12,7 @@ namespace SellbriteAccessTests
 		[ Test ]
 		public void ToSVOrder()
 		{
+			var orderId = "001";
 			var carrier = "USPS";
 			var carrierClass = "USPS Priority Mail";
 			var shippingCity = "Gotham City";
@@ -20,9 +21,12 @@ namespace SellbriteAccessTests
 
 			var order = new Order()
 			{
+				SbOrderSeq = orderId,
 				DisplayRef = "10-ab-cd",
 				ChannelTypeDisplayName = "Etsy",
 				OrderedAt = "2017-01-06T22:28:42Z",
+				PaidAt = "2017-01-06T22:45:42Z",
+				ShippedAt = null,
 				SbStatus = "open",
 				ShipmentStatus = "none",
 				SbPaymentStatus = "all",
@@ -44,6 +48,7 @@ namespace SellbriteAccessTests
 			var result = order.ToSvOrder();
 
 			result.Should().NotBeNull();
+			result.Id.Should().Be( orderId );
 			result.ExternalId.Should().Be( order.DisplayRef );
 			result.Total.Should().Be( order.Total );
 			result.CreatedAtUtc.Should().Be( order.OrderedAt.FromRFC3339ToUtc() );

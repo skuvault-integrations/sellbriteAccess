@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SellbriteAccess.Services.Orders
 {
-	public interface ISellbriteOrdersService
+	public interface ISellbriteOrdersService : IDisposable
 	{
 		Task< IEnumerable< SellbriteOrder > > GetOrdersAsync( DateTime startDateUtc, DateTime endDateUtc, CancellationToken token );
 	}

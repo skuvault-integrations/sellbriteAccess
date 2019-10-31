@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace SellbriteAccess.Services
 {
-	public class BaseService
+	public class BaseService : IDisposable
 	{
 		protected SellbriteConfig Config { get; private set; }
 		protected SellbriteMerchantCredentials Credentials { get; private set; }
@@ -189,5 +189,27 @@ namespace SellbriteAccess.Services
 			);
 			return str;
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false;
+
+		void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					this.Throttler.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+		}
+		#endregion
 	}
 }
