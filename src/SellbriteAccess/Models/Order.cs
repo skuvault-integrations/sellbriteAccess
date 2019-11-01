@@ -62,6 +62,7 @@ namespace SellbriteAccess.Models
 	{
 		public string Sku { get; set; }
 		public int Quantity { get; set; }
+		[ JsonProperty( "unit_price" ) ]
 		public decimal UnitPrice { get; set; }
 		public decimal Tax { get; set; }
 	}
