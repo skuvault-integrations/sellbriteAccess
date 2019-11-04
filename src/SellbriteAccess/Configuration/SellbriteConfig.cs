@@ -10,6 +10,7 @@ namespace SellbriteAccess.Configuration
 		public readonly NetworkOptions NetworkOptions;
 
 		public int OrdersPageLimit { get; set; }
+		public int ProductsInventoryUpdateMaxBatchSize { get; set; }
 
 		public SellbriteConfig( ThrottlingOptions throttlingOptions, NetworkOptions networkOptions )
 		{
@@ -19,6 +20,7 @@ namespace SellbriteAccess.Configuration
 			this.ThrottlingOptions = throttlingOptions;
 			this.NetworkOptions = networkOptions;
 			this.OrdersPageLimit = 100;
+			this.ProductsInventoryUpdateMaxBatchSize = 50;
 		}
 
 		public SellbriteConfig() : this( ThrottlingOptions.SellbriteDefaultOptions, NetworkOptions.SellbriteDefaultOptions )
@@ -83,5 +85,8 @@ namespace SellbriteAccess.Configuration
 	public class SellbriteEndPoint
 	{
 		public static readonly string OrdersUrl = "/v1/orders";
+		public static readonly string ProductsUrl = "/v1/products";
+		public static readonly string ProductsInventoryUrl = "/v1/inventory";
+		public static readonly string WarehousesUrl = "/v1/warehouses";
 	}
 }

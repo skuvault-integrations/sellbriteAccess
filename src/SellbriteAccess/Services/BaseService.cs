@@ -81,7 +81,7 @@ namespace SellbriteAccess.Services
 			return response;
 		}
 
-		protected async Task< T > GetAsync< T >( string url, CancellationToken cancellationToken, Mark mark = null )
+		protected async Task< T > PutAsync< T >( string url, T data, CancellationToken cancellationToken, Mark mark = null )
 		{
 			if ( cancellationToken.IsCancellationRequested )
 			{
@@ -89,9 +89,10 @@ namespace SellbriteAccess.Services
 				throw new SellbriteException( string.Format( "{0}. Task was cancelled", exceptionDetails ) );
 			}
 
-			var responseContent = await this.ThrottleRequest( url, string.Empty, mark, async ( token ) =>
+			var responseContent = await this.ThrottleRequest( url, data.ToJson(), mark, async ( token ) =>
 			{
-				var httpResponse = await HttpClient.GetAsync( url ).ConfigureAwait( false );
+				var payload = new StringContent( JsonConvert.SerializeObject( data ), Encoding.UTF8, "application/json" );
+				var httpResponse = await HttpClient.PutAsync( url, payload, token ).ConfigureAwait( false );
 				var content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait( false );
 
 				ThrowIfError( httpResponse, content );
@@ -104,11 +105,37 @@ namespace SellbriteAccess.Services
 			return response;
 		}
 
+		protected Task< string > GetAsync( string url, CancellationToken cancellationToken, Mark mark = null )
+		{
+			if ( cancellationToken.IsCancellationRequested )
+			{
+				var exceptionDetails = CreateMethodCallInfo( url, mark, additionalInfo: this.AdditionalLogInfo() );
+				throw new SellbriteException( string.Format( "{0}. Task was cancelled", exceptionDetails ) );
+			}
+
+			return this.ThrottleRequest( url, string.Empty, mark, async ( token ) =>
+			{
+				var httpResponse = await HttpClient.GetAsync( url ).ConfigureAwait( false );
+				var content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait( false );
+
+				ThrowIfError( httpResponse, content );
+
+				return content;
+			}, cancellationToken );
+		}
+
+		protected async Task< T > GetAsync< T >( string url, CancellationToken cancellationToken, Mark mark = null )
+		{
+			var response = await this.GetAsync( url, cancellationToken, mark ).ConfigureAwait( false );
+
+			return JsonConvert.DeserializeObject< T >( response );
+		}
+
 		protected void ThrowIfError( HttpResponseMessage response, string message )
 		{
 			HttpStatusCode responseStatusCode = response.StatusCode;
 
-			if ( response.IsSuccessStatusCode )
+			if ( response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound )
 				return;
 
 			if ( responseStatusCode == HttpStatusCode.Unauthorized )
