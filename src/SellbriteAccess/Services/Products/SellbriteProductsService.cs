@@ -7,9 +7,9 @@ using SellbriteAccess.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CuttingEdge.Conditions;
 
 namespace SellbriteAccess.Services.Products
 {
@@ -84,6 +84,56 @@ namespace SellbriteAccess.Services.Products
 			{
 				await base.PutAsync< UpdateSkusInventoryRequest >( url, new UpdateSkusInventoryRequest() { Inventory = chunk.ToArray() }, token, Mark.CreateNew() );
 			}
+		}
+
+		public async Task< IEnumerable< SellbriteProduct > > GetProductsByDateModifiedAsync( DateTime startDateUtc, DateTime endDateUtc, CancellationToken token )
+		{
+			Condition.Requires( startDateUtc ).IsLessThan( endDateUtc );
+			
+			var products = new List< SellbriteProduct >();
+			int page = 1;
+
+			while( true )
+			{
+				var productsByPage = ( await this.GetProductsByPageAsync( startDateUtc, endDateUtc, page, base.Config.ProductsPageLimit, token ).ConfigureAwait( false ) ).ToList();
+
+				if ( !productsByPage.Any() )
+				{
+					break;
+				}
+
+				products.AddRange( productsByPage );
+
+				++page;
+			}
+
+			return products;
+		}
+
+		private async Task< IEnumerable< SellbriteProduct > > GetProductsByPageAsync( DateTime startDateUtc, DateTime endDateUtc, int page, int limit, CancellationToken token )
+		{
+			var mark = Mark.CreateNew();
+			var products = new List< SellbriteProduct >();
+			var url = string.Format("{0}?min_modified_at={1}&max_modified_at={2}&page={3}&limit={4}", SellbriteEndPoint.ProductsUrl, startDateUtc.FromUtcToRFC3339(), endDateUtc.FromUtcToRFC3339(), page, limit );
+
+			try
+			{
+				SellbriteLogger.LogStarted( this.CreateMethodCallInfo( url, mark, additionalInfo: this.AdditionalLogInfo() ) );
+
+				var response = await base.GetAsync( url, token ).ConfigureAwait( false );
+
+				products = JsonConvert.DeserializeObject< IEnumerable< SellbriteProduct > >( response ).ToList();
+
+				SellbriteLogger.LogEnd( this.CreateMethodCallInfo( url, mark, methodResult: products.ToJson(), additionalInfo: this.AdditionalLogInfo() ) );
+			}
+			catch( Exception ex )
+			{
+				var sellbriteException = new SellbriteException( this.CreateMethodCallInfo( url, mark, additionalInfo: this.AdditionalLogInfo() ), ex );
+				SellbriteLogger.LogTraceException( sellbriteException );
+				throw sellbriteException;
+			}
+
+			return products;
 		}
 	}
 }

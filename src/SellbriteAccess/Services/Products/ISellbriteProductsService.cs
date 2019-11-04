@@ -1,4 +1,5 @@
-﻿using SellbriteAccess.Models;
+﻿using System;
+using SellbriteAccess.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,5 +13,6 @@ namespace SellbriteAccess.Services.Products
 		Task UpdateSkuQuantityAsync( string sku, int quantity, string warehouseId, CancellationToken token );
 		Task UpdateSkusQuantitiesAsync( Dictionary< string, int > skusQuantities, string warehouseId, CancellationToken token );
 		Task< Warehouse[] > GetWarehousesAsync( CancellationToken token );
+		Task< IEnumerable< SellbriteProduct > > GetProductsByDateModifiedAsync( DateTime startDateUtc, DateTime endDateUtc, CancellationToken token );
 	}
 }

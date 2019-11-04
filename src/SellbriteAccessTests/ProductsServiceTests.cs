@@ -91,5 +91,26 @@ namespace SellbriteAccessTests
 			sku2Inventory.Sku.Should().Be( _sku2 );
 			sku2Inventory.Available.Should().Be( sku2Quantity );
 		}
+
+		[ Test ]
+		public async Task GetProductsByDateModifiedAsync()
+		{
+			var startDateUtc = new DateTime( 2019, 1, 1 );
+
+			var products = await _productsService.GetProductsByDateModifiedAsync( startDateUtc, DateTime.MaxValue, CancellationToken.None );
+
+			products.Should().NotBeEmpty();
+		}
+
+		[ Test ]
+		public async Task GetProductsPageAsync()
+		{
+			var startDateUtc = new DateTime( 2019, 1, 1 );
+			base.Config.ProductsPageLimit = 2;
+
+			var products = await _productsService.GetProductsByDateModifiedAsync( startDateUtc, DateTime.MaxValue, CancellationToken.None );
+
+			products.Count().Should().BeGreaterThan( base.Config.ProductsPageLimit );
+		}
 	}
 }
