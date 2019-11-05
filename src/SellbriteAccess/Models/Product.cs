@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using SellbriteAccess.Shared;
 
@@ -44,7 +45,7 @@ namespace SellbriteAccess.Models
 		public string UPC { get; set; }
 		public int? Quantity { get; set; }
 		public string Provider { get; set; }
-		public string ImageList { get; set; }
+		public string Image { get; set; }
 		public decimal Weight { get; set; }
 		public string WeightUnits { get; set; }
 		public DateTime ModifiedAtUtc { get; set; }
@@ -71,7 +72,7 @@ namespace SellbriteAccess.Models
 				Cost = product.Cost,
 				Description = product.Description,
 				Id = product.Id,
-				ImageList = product.ImageList,
+				Image = product.ImageList.Split( '|' ).FirstOrDefault(),
 				Manufacturer = product.Manufacturer,
 				Name = product.Name,
 				Price = product.Price,

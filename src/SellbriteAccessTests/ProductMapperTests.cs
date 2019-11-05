@@ -11,6 +11,8 @@ namespace SellbriteAccessTests
 		[ Test ]
 		public void ToSvProduct()
 		{
+			var image = "asdfsdf.com/image1.jpg";
+			var image2 = "asdfsdf.com/image2.jpg";
 			var product = new Product
 			{
 				Brand = "some brand",
@@ -18,7 +20,7 @@ namespace SellbriteAccessTests
 				Cost = 12,
 				Description = "asdf",
 				Id = 1,
-				ImageList = "asdfsdf.com",
+				ImageList = $"{image}|{image2}",
 				Manufacturer = "manny",
 				Name = "some name",
 				Price = 10000000.00m,
@@ -39,7 +41,7 @@ namespace SellbriteAccessTests
 			svProduct.Cost.Should().Be( product.Cost );
 			svProduct.Description.Should().Be( product.Description );
 			svProduct.Id.Should().Be( product.Id );
-			svProduct.ImageList.Should().Be( product.ImageList );
+			svProduct.Image.Should().Be( image );
 			svProduct.Manufacturer.Should().Be( product.Manufacturer );
 			svProduct.Name.Should().Be( product.Name );
 			svProduct.Price.Should().Be( product.Price );
