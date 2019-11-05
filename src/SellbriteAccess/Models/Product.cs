@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Newtonsoft.Json;
+using SellbriteAccess.Shared;
 
 namespace SellbriteAccess.Models
 {
@@ -25,6 +26,9 @@ namespace SellbriteAccess.Models
 		public decimal Weight { get; set; }
 		[ JsonProperty( "package_unit_of_weight") ]
 		public string WeightUnits { get; set; }
+		[ JsonProperty( "modified_at") ]
+		private string ModifiedAtRFC3339 { get; set; }
+		public DateTime ModifiedAtUtc => ModifiedAtRFC3339.FromRFC3339ToUtc();
 	}
 
 	public class SellbriteProductInventory
