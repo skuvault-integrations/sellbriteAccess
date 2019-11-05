@@ -57,7 +57,7 @@ namespace SellbriteAccess.Services
 			this.HttpClient.DefaultRequestHeaders.Add( "Authorization", headerValue );
 		}
 
-		protected async Task< T > PostAsync< T >( string url, Dictionary< string, string > body, CancellationToken cancellationToken, Mark mark = null )
+		protected Task< string > PutAsync< T >( string url, T data, CancellationToken cancellationToken, Mark mark = null )
 		{
 			if ( cancellationToken.IsCancellationRequested )
 			{
@@ -65,31 +65,7 @@ namespace SellbriteAccess.Services
 				throw new SellbriteException( string.Format( "{0}. Task was cancelled", exceptionDetails ) );
 			}
 
-			var responseContent = await this.ThrottleRequest( url, body.ToJson(), mark, async ( token ) =>
-			{
-				var payload = new FormUrlEncodedContent( body );
-				var httpResponse = await HttpClient.PostAsync( url, payload, token ).ConfigureAwait( false );
-				var content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait( false );
-
-				ThrowIfError( httpResponse, content );
-
-				return content;
-			}, cancellationToken ).ConfigureAwait( false );
-
-			var response = JsonConvert.DeserializeObject< T >( responseContent );
-
-			return response;
-		}
-
-		protected async Task< T > PutAsync< T >( string url, T data, CancellationToken cancellationToken, Mark mark = null )
-		{
-			if ( cancellationToken.IsCancellationRequested )
-			{
-				var exceptionDetails = CreateMethodCallInfo( url, mark, additionalInfo: this.AdditionalLogInfo() );
-				throw new SellbriteException( string.Format( "{0}. Task was cancelled", exceptionDetails ) );
-			}
-
-			var responseContent = await this.ThrottleRequest( url, data.ToJson(), mark, async ( token ) =>
+			return this.ThrottleRequest( url, data.ToJson(), mark, async ( token ) =>
 			{
 				var payload = new StringContent( JsonConvert.SerializeObject( data ), Encoding.UTF8, "application/json" );
 				var httpResponse = await HttpClient.PutAsync( url, payload, token ).ConfigureAwait( false );
@@ -98,11 +74,7 @@ namespace SellbriteAccess.Services
 				ThrowIfError( httpResponse, content );
 
 				return content;
-			}, cancellationToken ).ConfigureAwait( false );
-
-			var response = JsonConvert.DeserializeObject< T >( responseContent );
-
-			return response;
+			}, cancellationToken );
 		}
 
 		protected Task< string > GetAsync( string url, CancellationToken cancellationToken, Mark mark = null )

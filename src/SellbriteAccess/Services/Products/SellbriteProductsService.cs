@@ -20,9 +20,29 @@ namespace SellbriteAccess.Services.Products
 		public SellbriteProductsService( SellbriteConfig config, SellbriteMerchantCredentials credentials ) : base( config, credentials )
 		{ }
 
+		public async Task< SellbriteProductInventory[] > GetAllSkusInventory( string warehouseId, CancellationToken token )
+		{
+			var productsInventories = new List< SellbriteProductInventory >();
+			int page = 1;
+
+			while( true )
+			{
+				var url = string.Format("{0}?page={1}&limit={2}", SellbriteEndPoint.ProductsInventoryUrl, page, base.Config.ProductsInventoriesPageLimit );
+				var response = await base.GetAsync< SellbriteProductInventory[] >( url, token, Mark.CreateNew() ).ConfigureAwait( false );
+
+				if ( response.Count() == 0 )
+					break;
+
+				productsInventories.AddRange( response );
+				page++;
+			}
+
+			return productsInventories.ToArray();
+		}
+
 		public async Task< SellbriteProduct > GetProductBySkuAsync( string sku, CancellationToken token )
 		{
-			var url = string.Format( "{0}/{1}", SellbriteEndPoint.ProductsUrl, Uri.EscapeDataString( sku ) );
+			var url = string.Format( "{0}?skus={1}", SellbriteEndPoint.ProductsUrl, Uri.EscapeDataString( sku ) );
 			var response = await base.GetAsync( url, token ).ConfigureAwait( false );
 
 			if ( response.Contains( _productNotFoundErrorMessage ) )
@@ -30,7 +50,7 @@ namespace SellbriteAccess.Services.Products
 				return null;
 			}
 
-			return JsonConvert.DeserializeObject< SellbriteProduct >( response );
+			return JsonConvert.DeserializeObject< SellbriteProduct[] >( response ).FirstOrDefault();
 		}
 
 		public async Task< SellbriteProductInventory > GetSkuInventory( string sku, string warehouseId, CancellationToken token )
@@ -61,7 +81,7 @@ namespace SellbriteAccess.Services.Products
 
 			var request = new UpdateSkusInventoryRequest()
 			{
-				Inventory = new UpdateSkuInventoryRequest[] { 
+				Requests = new UpdateSkuInventoryRequest[] { 
 					new UpdateSkuInventoryRequest()
 					{
 						WarehouseUuid = warehouseId,
@@ -82,7 +102,7 @@ namespace SellbriteAccess.Services.Products
 
 			foreach( var chunk in chunks )
 			{
-				await base.PutAsync< UpdateSkusInventoryRequest >( url, new UpdateSkusInventoryRequest() { Inventory = chunk.ToArray() }, token, Mark.CreateNew() );
+				await base.PutAsync< UpdateSkusInventoryRequest >( url, new UpdateSkusInventoryRequest() { Requests = chunk.ToArray() }, token, Mark.CreateNew() );
 			}
 		}
 	}

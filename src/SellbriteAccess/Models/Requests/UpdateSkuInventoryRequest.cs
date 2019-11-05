@@ -5,7 +5,7 @@ namespace SellbriteAccess.Models.Requests
 	public class UpdateSkusInventoryRequest
 	{
 		[ JsonProperty( "inventory" ) ]
-		public UpdateSkuInventoryRequest[] Inventory { get; set; }
+		public UpdateSkuInventoryRequest[] Requests { get; set; }
 	}
 
 	public class UpdateSkuInventoryRequest

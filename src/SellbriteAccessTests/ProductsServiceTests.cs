@@ -15,6 +15,7 @@ namespace SellbriteAccessTests
 		private ISellbriteProductsService _productsService;
 		private string _sku = "testsku1";
 		private string _sku2 = "testsku2";
+		private string _sku3 = "testsku4";
 		private string _activeWarehouseId;
 
 		[ SetUp ]
@@ -34,11 +35,28 @@ namespace SellbriteAccessTests
 		}
 
 		[ Test ]
+		public async Task GetProductBySkuSearchShouldBeCaseSensitive()
+		{
+			var product = await _productsService.GetProductBySkuAsync( _sku3, CancellationToken.None );
+
+			product.Should().BeNull();
+		}
+
+		[ Test ]
 		public async Task GetWarehouses()
 		{
 			var warehouses = await _productsService.GetWarehousesAsync( CancellationToken.None );
 
 			warehouses.Count().Should().BeGreaterThan( 0 );
+		}
+
+		[ Test ]
+		public async Task GetAllSkusInventories()
+		{
+			base.Config.ProductsInventoriesPageLimit = 5;
+			var inventories = await _productsService.GetAllSkusInventory( _activeWarehouseId, CancellationToken.None );
+
+			inventories.Count().Should().BeGreaterThan( 0 );
 		}
 
 		[ Test ]
@@ -73,7 +91,7 @@ namespace SellbriteAccessTests
 			int skuQuantity = rand.Next(1, 100 );
 			int sku2Quantity = rand.Next(1, 100 );
 
-			var skusQuantities = new Dictionary<string, int>
+			var skusQuantities = new Dictionary< string, int >
 			{
 				{ _sku, skuQuantity },
 				{ _sku2, sku2Quantity }
@@ -90,6 +108,41 @@ namespace SellbriteAccessTests
 			sku2Inventory.Should().NotBeNull();
 			sku2Inventory.Sku.Should().Be( _sku2 );
 			sku2Inventory.Available.Should().Be( sku2Quantity );
+		}
+
+		[ Test ]
+		public async Task BatchUpdateSkusQuantities()
+		{
+			base.Config.ProductsInventoryUpdateMaxBatchSize = 2;
+			var rand = new Random();
+			var skusQuantities = new Dictionary< string, int >();
+			var skusNumber = 20;
+			
+			for( int i = 0; i < skusNumber; i++ )
+			{
+				var sku = "testsku" + i.ToString();
+
+				// inventory update request should include only existing in Sellbrite skus
+				var product = await _productsService.GetProductBySkuAsync( sku, CancellationToken.None );
+
+				if ( product != null )
+				{
+					skusQuantities.Add( sku, rand.Next( 1, 100 ) );
+				}
+			}
+
+			await _productsService.UpdateSkusQuantitiesAsync( skusQuantities, _activeWarehouseId, CancellationToken.None );
+
+			foreach( var skuQuantity in skusQuantities )
+			{
+				var skuInventory = await _productsService.GetSkuInventory( skuQuantity.Key, _activeWarehouseId, CancellationToken.None );
+				
+				if ( skuInventory == null )
+					continue;
+
+				skuInventory.Sku.Should().Be( skuQuantity.Key );
+				skuInventory.Available.Should().Be( skuQuantity.Value );
+			}
 		}
 	}
 }
