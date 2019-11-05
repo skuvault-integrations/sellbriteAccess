@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace SellbriteAccess.Models
 {
@@ -16,8 +17,14 @@ namespace SellbriteAccess.Models
 		public string CategoryName { get; set; }
 		[ JsonProperty( "upc" ) ]
 		public string UPC { get; set; }
-		public int Quantity { get; set; }
+		public int? Quantity { get; set; }
 		public string Provider { get; set; }
+		[ JsonProperty( "image_list") ]
+		public string ImageList { get; set; }
+		[ JsonProperty( "package_weight") ]
+		public decimal Weight { get; set; }
+		[ JsonProperty( "package_unit_of_weight") ]
+		public string WeightUnits { get; set; }
 	}
 
 	public class SellbriteProductInventory
