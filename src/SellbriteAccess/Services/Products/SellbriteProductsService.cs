@@ -50,7 +50,7 @@ namespace SellbriteAccess.Services.Products
 				return null;
 			}
 
-			return JsonConvert.DeserializeObject< SellbriteProduct[] >( response ).FirstOrDefault();
+			return JsonConvert.DeserializeObject< Product[] >( response ).FirstOrDefault().ToSvProduct();
 		}
 
 		public async Task< SellbriteProductInventory > GetSkuInventory( string sku, string warehouseId, CancellationToken token )
@@ -159,7 +159,7 @@ namespace SellbriteAccess.Services.Products
 
 				var response = await base.GetAsync( url, token ).ConfigureAwait( false );
 
-				products = JsonConvert.DeserializeObject< IEnumerable< SellbriteProduct > >( response ).ToList();
+				products = JsonConvert.DeserializeObject< IEnumerable< Product > >( response ).Select( p => p.ToSvProduct() ).ToList();
 
 				SellbriteLogger.LogEnd( this.CreateMethodCallInfo( url, mark, methodResult: products.ToJson(), additionalInfo: this.AdditionalLogInfo() ) );
 			}
