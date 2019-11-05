@@ -66,6 +66,7 @@
     <Compile Include="BaseTest.cs" />
     <Compile Include="OrderMapperTests.cs" />
     <Compile Include="OrdersServiceTests.cs" />
+    <Compile Include="ProductsServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SellbriteTestConfig.cs" />
   </ItemGroup>
