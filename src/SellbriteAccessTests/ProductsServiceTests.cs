@@ -121,14 +121,7 @@ namespace SellbriteAccessTests
 			for( int i = 0; i < skusNumber; i++ )
 			{
 				var sku = "testsku" + i.ToString();
-
-				// inventory update request should include only existing in Sellbrite skus
-				var product = await _productsService.GetProductBySkuAsync( sku, CancellationToken.None );
-
-				if ( product != null )
-				{
-					skusQuantities.Add( sku, rand.Next( 1, 100 ) );
-				}
+				skusQuantities.Add( sku, rand.Next( 1, 100 ) );
 			}
 
 			await _productsService.UpdateSkusQuantitiesAsync( skusQuantities, _activeWarehouseId, CancellationToken.None );
