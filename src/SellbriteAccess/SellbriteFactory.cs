@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SellbriteAccess.Configuration;
+﻿using SellbriteAccess.Configuration;
 using SellbriteAccess.Services.Orders;
+using SellbriteAccess.Services.Products;
 
 namespace SellbriteAccess
 {
@@ -18,6 +16,11 @@ namespace SellbriteAccess
 		public ISellbriteOrdersService CreateOrdersService( SellbriteMerchantCredentials credentials )
 		{
 			return new SellbriteOrdersService( this._config, credentials );
+		}
+
+		public ISellbriteProductsService CreateProductsService( SellbriteMerchantCredentials credentials )
+		{
+			return new SellbriteProductsService( this._config, credentials );
 		}
 	}
 }

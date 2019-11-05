@@ -96,8 +96,25 @@ namespace SellbriteAccess.Services.Products
 
 		public async Task UpdateSkusQuantitiesAsync( Dictionary< string, int > skusQuantities, string warehouseId, CancellationToken token )
 		{
+			var skuInventoryUpdateRequests = new List< UpdateSkuInventoryRequest >();
+			var skusInventories = await this.GetAllSkusInventory( warehouseId, token ).ConfigureAwait( false );
+
+			foreach( var skuInventory in skusInventories )
+			{
+				var skuQuantity = skusQuantities.FirstOrDefault( sq => sq.Key.ToLower().Equals( skuInventory.Sku.ToLower() ) );
+
+				if ( skuQuantity.Key != null )
+				{
+					skuInventoryUpdateRequests.Add( new UpdateSkuInventoryRequest()
+					{
+						Sku = skuInventory.Sku,
+						WarehouseUuid = warehouseId,
+						Available = skuQuantity.Value
+					} );
+				}
+			}
+
 			var url = SellbriteEndPoint.ProductsInventoryUrl;
-			var skuInventoryUpdateRequests = skusQuantities.Select( sq => new UpdateSkuInventoryRequest() { Sku = sq.Key, Available = sq.Value, WarehouseUuid = warehouseId } );
 			var chunks = skuInventoryUpdateRequests.SplitToChunks( base.Config.ProductsInventoryUpdateMaxBatchSize );
 
 			foreach( var chunk in chunks )
