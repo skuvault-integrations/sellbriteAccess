@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SellbriteAccess.Services.Products
 {
-	public interface ISellbriteProductsService
+	public interface ISellbriteProductsService : IDisposable
 	{
 		Task< SellbriteProduct > GetProductBySkuAsync( string sku, CancellationToken token );
 		Task< SellbriteProductInventory > GetSkuInventory( string sku, string warehouseId, CancellationToken token );
