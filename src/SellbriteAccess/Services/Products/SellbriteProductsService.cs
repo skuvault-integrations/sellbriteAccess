@@ -50,7 +50,14 @@ namespace SellbriteAccess.Services.Products
 				return null;
 			}
 
-			return JsonConvert.DeserializeObject< Product[] >( response ).FirstOrDefault().ToSvProduct();
+			var product = JsonConvert.DeserializeObject< Product[] >( response ).FirstOrDefault();
+
+			if ( product != null )
+			{
+				return product.ToSvProduct();
+			}
+
+			return null;
 		}
 
 		public async Task< SellbriteProductInventory > GetSkuInventory( string sku, string warehouseId, CancellationToken token )
