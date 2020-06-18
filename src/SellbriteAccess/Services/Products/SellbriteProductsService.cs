@@ -117,7 +117,7 @@ namespace SellbriteAccess.Services.Products
 
 		public IEnumerable< UpdateSkuInventoryRequest > GetUpdateRequests( Dictionary< string, int > updatedSkusQuantities, IEnumerable< SellbriteProductInventory > sellbriteInventory, string warehouseId )
 		{
-			return updatedSkusQuantities.Join( sellbriteInventory, sq => sq.Key.ToLower(), si => si.Sku.ToLower(), ( sq, si ) =>
+			return updatedSkusQuantities.Join( sellbriteInventory, sq => sq.Key.ToUpperInvariant(), si => si.Sku.ToUpperInvariant(), ( sq, si ) =>
 			{
 				return new UpdateSkuInventoryRequest()
 				{
