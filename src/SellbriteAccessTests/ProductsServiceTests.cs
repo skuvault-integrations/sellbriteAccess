@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
+using SellbriteAccess.Models;
 using SellbriteAccess.Services.Products;
 using System;
 using System.Collections.Generic;
@@ -157,6 +158,34 @@ namespace SellbriteAccessTests
 			var products = await _productsService.GetProductsByDateModifiedAsync( startDateUtc, DateTime.MaxValue, CancellationToken.None );
 
 			products.Count().Should().BeGreaterThan( base.Config.ProductsPageLimit );
+		}
+
+		[ Test ]
+		public void GetUpdateRequestsWhenSVQuantitiesRequestIsSmallAndSellbriteCatalogIsLarge()
+		{
+			var svQuantities = new Dictionary< string, int >();
+			var skuPrefix = "testSku";
+			var random = new Random();
+			var catalogSize = 100000;
+
+			for (int i = 1; i <= 10; i++)
+			{
+				svQuantities.Add( $"{ skuPrefix }{ random.Next(1, catalogSize).ToString() }", 1 );
+			}
+
+			var sellbriteQuantities = new List< SellbriteProductInventory >();
+			for( int i = 1; i <= catalogSize; i++)
+			{
+				sellbriteQuantities.Add( new SellbriteProductInventory()
+				{
+					Sku = $"{ skuPrefix }{ i }",
+					Available = 1
+				} );
+			}
+
+			var updateRequests = new SellbriteProductsService( base.Config, base.Credentials ).GetUpdateRequests( svQuantities, sellbriteQuantities, _activeWarehouseId );
+			updateRequests.Should().NotBeNullOrEmpty();
+			updateRequests.Count().Should().Be( svQuantities.Count );
 		}
 	}
 }

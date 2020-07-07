@@ -103,23 +103,8 @@ namespace SellbriteAccess.Services.Products
 
 		public async Task UpdateSkusQuantitiesAsync( Dictionary< string, int > skusQuantities, string warehouseId, CancellationToken token )
 		{
-			var skuInventoryUpdateRequests = new List< UpdateSkuInventoryRequest >();
-			var skusInventories = await this.GetAllSkusInventory( warehouseId, token ).ConfigureAwait( false );
-
-			foreach( var skuInventory in skusInventories )
-			{
-				var skuQuantity = skusQuantities.FirstOrDefault( sq => sq.Key.ToLower().Equals( skuInventory.Sku.ToLower() ) );
-
-				if ( skuQuantity.Key != null )
-				{
-					skuInventoryUpdateRequests.Add( new UpdateSkuInventoryRequest()
-					{
-						Sku = skuInventory.Sku,
-						WarehouseUuid = warehouseId,
-						Available = skuQuantity.Value
-					} );
-				}
-			}
+			var sellbriteSkusInventories = await this.GetAllSkusInventory( warehouseId, token ).ConfigureAwait( false );
+			var skuInventoryUpdateRequests = GetUpdateRequests( skusQuantities, sellbriteSkusInventories, warehouseId );
 
 			var url = SellbriteEndPoint.ProductsInventoryUrl;
 			var chunks = skuInventoryUpdateRequests.SplitToChunks( base.Config.ProductsInventoryUpdateMaxBatchSize );
@@ -128,6 +113,19 @@ namespace SellbriteAccess.Services.Products
 			{
 				await base.PutAsync< UpdateSkusInventoryRequest >( url, new UpdateSkusInventoryRequest() { Requests = chunk.ToArray() }, token, Mark.CreateNew() );
 			}
+		}
+
+		public IEnumerable< UpdateSkuInventoryRequest > GetUpdateRequests( Dictionary< string, int > updatedSkusQuantities, IEnumerable< SellbriteProductInventory > sellbriteInventory, string warehouseId )
+		{
+			return updatedSkusQuantities.Join( sellbriteInventory, sq => sq.Key.ToUpperInvariant(), si => si.Sku.ToUpperInvariant(), ( sq, si ) =>
+			{
+				return new UpdateSkuInventoryRequest()
+				{
+					Sku = si.Sku,
+					WarehouseUuid = warehouseId,
+					Available = sq.Value
+				};
+			} ).ToList();
 		}
 
 		public async Task< IEnumerable< SellbriteProduct > > GetProductsByDateModifiedAsync( DateTime startDateUtc, DateTime endDateUtc, CancellationToken token )
