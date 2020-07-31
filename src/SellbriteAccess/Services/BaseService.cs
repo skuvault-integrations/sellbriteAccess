@@ -87,7 +87,7 @@ namespace SellbriteAccess.Services
 
 			return this.ThrottleRequest( url, string.Empty, mark, async ( token ) =>
 			{
-				var httpResponse = await HttpClient.GetAsync( url ).ConfigureAwait( false );
+				var httpResponse = await HttpClient.GetAsync( url, token ).ConfigureAwait( false );
 				var content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait( false );
 
 				ThrowIfError( httpResponse, content );
