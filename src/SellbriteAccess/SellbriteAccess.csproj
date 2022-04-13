@@ -4,15 +4,15 @@
     <TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
     <Authors>SkuVault</Authors>
     <Company>SkuVault</Company>
-    <Version>1.0.2.0</Version>
+    <Version>1.0.4.0</Version>
     <Description>Sellbrite webservices API wrapper</Description>
     <Copyright>SkuVault © 2020</Copyright>
     <PackageLicenseUrl>https://github.com/skuvault/sellbriteAccess/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/skuvault/sellbriteAccess</PackageProjectUrl>
     <RepositoryUrl>https://github.com/skuvault/sellbriteAccess</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
